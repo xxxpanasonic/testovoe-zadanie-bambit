@@ -1,6 +1,6 @@
 <template>
   <div class="app">
-    <SearchInput @update-photos="handleUpdatePhotos" @update-album-ids="handleUpdateAlbumIds" />
+    <SearchInput @update-photos="photos = $event" @update-album-ids="albumIds = $event" />
     <PhotoTable :photos="filteredPhotos" />
   </div>
 </template>
@@ -13,18 +13,9 @@ import PhotoTable from './components/PhotoTable.vue'
 const photos = ref([])
 const albumIds = ref([])
 
-const handleUpdatePhotos = (newPhotos) => {
-  photos.value = newPhotos
-}
-
-const handleUpdateAlbumIds = (newAlbumIds) => {
-  albumIds.value = newAlbumIds
-}
-
-const filteredPhotos = computed(() => {
-  if (albumIds.value.length === 0) return photos.value
-  return photos.value.filter(photo => albumIds.value.includes(photo.albumId))
-})
+const filteredPhotos = computed(() =>
+  albumIds.value.length ? photos.value.filter(photo => albumIds.value.includes(photo.albumId)) : photos.value
+)
 </script>
 
 <style lang="sass">

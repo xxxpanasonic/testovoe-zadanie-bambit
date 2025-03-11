@@ -24,34 +24,28 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 
+// eslint-disable-next-line vue/require-default-prop
 const props = defineProps({ photos: Array })
 const visiblePhotos = ref([])
 const sortKey = ref('id')
 const sortDirection = ref('asc')
 
-const sortedPhotos = computed(() => {
-  if (!props.photos) return []
-  return [...props.photos].sort((a, b) => {
-    const modifier = sortDirection.value === 'asc' ? 1 : -1
-    return a[sortKey.value] > b[sortKey.value] ? modifier : -modifier
-  })
-})
+const sortedPhotos = computed(() =>
+  props.photos ? [...props.photos].sort((a, b) =>
+    (a[sortKey.value] > b[sortKey.value] ? 1 : -1) * (sortDirection.value === 'asc' ? 1 : -1)
+  ) : []
+)
 
 const sort = (key) => {
-  if (sortKey.value === key) {
-    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
-  } else {
-    sortKey.value = key
-    sortDirection.value = 'asc'
-  }
+  if (sortKey.value === key) sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
+  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+  else sortKey.value = key, sortDirection.value = 'asc'
   visiblePhotos.value = sortedPhotos.value.slice(0, 30)
 }
 
 const handleScroll = (event) => {
   const { scrollTop, scrollHeight, clientHeight } = event.target
-  if (scrollTop + clientHeight >= scrollHeight - 50) {
-    loadMore()
-  }
+  if (scrollTop + clientHeight >= scrollHeight - 50) loadMore()
 }
 
 const loadMore = () => {
@@ -59,9 +53,7 @@ const loadMore = () => {
   visiblePhotos.value = [...visiblePhotos.value, ...sortedPhotos.value.slice(currentLength, currentLength + 30)]
 }
 
-onMounted(() => {
-  visiblePhotos.value = sortedPhotos.value.slice(0, 30)
-})
+onMounted(() => visiblePhotos.value = sortedPhotos.value.slice(0, 30))
 </script>
 
 <style scoped lang="sass">
