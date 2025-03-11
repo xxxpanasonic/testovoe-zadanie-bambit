@@ -1,4 +1,6 @@
 <template>
+  <button @click="sort">Поиск</button>
+  <button @click="chooseTheme">Переключить тему</button>
   <div class="photo-table" @scroll="handleScroll">
     <table>
       <thead>
@@ -24,16 +26,28 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 
+// eslint-disable-next-line vue/require-default-prop
 const props = defineProps({ photos: Array })
 const visiblePhotos = ref([])
 const sortKey = ref('id')
 const sortDirection = ref('asc')
+const emit = defineEmits(['choose-dark'])
 
+const chooseTheme = () => {
+  emit('choose-dark')
+}
 const sortedPhotos = computed(() => {
   if (!props.photos) return []
+
   return [...props.photos].sort((a, b) => {
-    const modifier = sortDirection.value === 'asc' ? 1 : -1
-    return a[sortKey.value] > b[sortKey.value] ? modifier : -modifier
+    const aValue = a[sortKey.value]
+    const bValue = b[sortKey.value]
+
+    if (sortDirection.value === 'asc') {
+      return aValue > bValue ? 1 : -1
+    } else {
+      return aValue < bValue ? 1 : -1
+    }
   })
 })
 
@@ -44,11 +58,13 @@ const sort = (key) => {
     sortKey.value = key
     sortDirection.value = 'asc'
   }
+
   visiblePhotos.value = sortedPhotos.value.slice(0, 30)
 }
 
 const handleScroll = (event) => {
   const { scrollTop, scrollHeight, clientHeight } = event.target
+
   if (scrollTop + clientHeight >= scrollHeight - 50) {
     loadMore()
   }
@@ -56,7 +72,9 @@ const handleScroll = (event) => {
 
 const loadMore = () => {
   const currentLength = visiblePhotos.value.length
-  visiblePhotos.value = [...visiblePhotos.value, ...sortedPhotos.value.slice(currentLength, currentLength + 30)]
+  const newPhotos = sortedPhotos.value.slice(currentLength, currentLength + 30)
+
+  visiblePhotos.value = [...visiblePhotos.value, ...newPhotos]
 }
 
 onMounted(() => {
@@ -70,11 +88,14 @@ onMounted(() => {
   max-height: 600px
   margin: 0 auto
   overflow: auto
+  &.dark
+    color: #eee;
+    background: #121212
 
   table
     width: 100%
     border-collapse: collapse
-
+    margin-top: 20px
     th, td
       padding: 8px
       border: 1px solid #ccc
@@ -86,4 +107,8 @@ onMounted(() => {
     th
       cursor: pointer
       background-color: #f4f4f4
+      position: sticky
+      top: 0
+      z-index: 1
+
 </style>
