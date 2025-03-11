@@ -1,4 +1,6 @@
 <template>
+  <button @click="sort">Поиск</button>
+  <button @click="chooseTheme">Переключить тему</button>
   <div class="photo-table" @scroll="handleScroll">
     <table>
       <thead>
@@ -29,31 +31,55 @@ const props = defineProps({ photos: Array })
 const visiblePhotos = ref([])
 const sortKey = ref('id')
 const sortDirection = ref('asc')
+const emit = defineEmits(['choose-dark'])
 
-const sortedPhotos = computed(() =>
-  props.photos ? [...props.photos].sort((a, b) =>
-    (a[sortKey.value] > b[sortKey.value] ? 1 : -1) * (sortDirection.value === 'asc' ? 1 : -1)
-  ) : []
-)
+const chooseTheme = () => {
+  emit('choose-dark')
+}
+const sortedPhotos = computed(() => {
+  if (!props.photos) return []
+
+  return [...props.photos].sort((a, b) => {
+    const aValue = a[sortKey.value]
+    const bValue = b[sortKey.value]
+
+    if (sortDirection.value === 'asc') {
+      return aValue > bValue ? 1 : -1
+    } else {
+      return aValue < bValue ? 1 : -1
+    }
+  })
+})
 
 const sort = (key) => {
-  if (sortKey.value === key) sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
-  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-  else sortKey.value = key, sortDirection.value = 'asc'
+  if (sortKey.value === key) {
+    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortKey.value = key
+    sortDirection.value = 'asc'
+  }
+
   visiblePhotos.value = sortedPhotos.value.slice(0, 30)
 }
 
 const handleScroll = (event) => {
   const { scrollTop, scrollHeight, clientHeight } = event.target
-  if (scrollTop + clientHeight >= scrollHeight - 50) loadMore()
+
+  if (scrollTop + clientHeight >= scrollHeight - 50) {
+    loadMore()
+  }
 }
 
 const loadMore = () => {
   const currentLength = visiblePhotos.value.length
-  visiblePhotos.value = [...visiblePhotos.value, ...sortedPhotos.value.slice(currentLength, currentLength + 30)]
+  const newPhotos = sortedPhotos.value.slice(currentLength, currentLength + 30)
+
+  visiblePhotos.value = [...visiblePhotos.value, ...newPhotos]
 }
 
-onMounted(() => visiblePhotos.value = sortedPhotos.value.slice(0, 30))
+onMounted(() => {
+  visiblePhotos.value = sortedPhotos.value.slice(0, 30)
+})
 </script>
 
 <style scoped lang="sass">
@@ -62,11 +88,14 @@ onMounted(() => visiblePhotos.value = sortedPhotos.value.slice(0, 30))
   max-height: 600px
   margin: 0 auto
   overflow: auto
+  &.dark
+    color: #eee;
+    background: #121212
 
   table
     width: 100%
     border-collapse: collapse
-
+    margin-top: 20px
     th, td
       padding: 8px
       border: 1px solid #ccc
@@ -78,4 +107,8 @@ onMounted(() => visiblePhotos.value = sortedPhotos.value.slice(0, 30))
     th
       cursor: pointer
       background-color: #f4f4f4
+      position: sticky
+      top: 0
+      z-index: 1
+
 </style>

@@ -1,6 +1,7 @@
 <template>
   <div class="search-input">
     <input v-model="albumId" placeholder="Номер альбома" @input="fetchPhotos" />
+
   </div>
 </template>
 
@@ -26,7 +27,6 @@ const fetchPhotos = async () => {
   }
 }
 
-fetchPhotos()
 </script>
 
 <style scoped lang="sass">
