@@ -1,6 +1,6 @@
 <template>
   <div class="app" :class="{ 'dark': isDark }">
-    <SearchInput @update-photos="photos = $event" @update-album-ids="albumIds = $event" />
+    <SearchInput @update-photos="photos = $event" />
     <PhotoTable :photos="filteredPhotos" @choose-dark="DarkMode" />
   </div>
 </template>

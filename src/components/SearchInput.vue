@@ -8,7 +8,7 @@
 <script setup>
 import { ref } from 'vue'
 
-const emit = defineEmits(['update-photos', 'update-album-ids'])
+const emit = defineEmits(['update-photos'])
 const albumId = ref('')
 
 const fetchPhotos = async () => {
@@ -21,7 +21,6 @@ const fetchPhotos = async () => {
     if (!response.ok) throw new Error('Ошибка JSON')
     const data = await response.json()
     emit('update-photos', data)
-    emit('update-album-ids', albumId.value.split(' ').map(Number))
   } catch {
     console.log('err')
   }
